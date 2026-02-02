@@ -1,6 +1,6 @@
 # DvHGNN
 
-![](https://i.imgur.com/qm4OLtI.png)
+![](https://github.com/anxuan-han/DvHGNN/blob/main/workflow.png)
 
 ## Requirements
 * python>=3.8
@@ -119,5 +119,53 @@ HGNN_Dataset requires a metadata CSV and a directory of precomputed `.h5` files.
 - `knn_indices`: shape `(N, k)`, defaults to self-loop with `k=10` if missing
 Here, `N` denotes the number of patches in a slide, `D` the feature dimension, and `k` the number of spatial neighbors per patch.
 
+## Training
+
+The model is trained using precomputed patch-level features and fixed semantic and spatial hypergraphs. Training is performed at the slide level, with one graph per sample.
+
+```bash
+python train.py \
+  --h5_dir /path/to/features \
+  --csv_path /path/to/labels.csv \
+  --output_dir /path/to/results \
+  --epochs 50 \
+  --lr 0.0001 \
+  --weight_decay 0.001 \
+  --dropout 0.5 \
+  --train_dropout 0.3
+```
 
 
+## Evaluation
+
+Model performance is evaluated using standard survival and classification metrics. All evaluation scripts operate on model predictions generated during training.
+
+### ROC analysis
+
+Receiver operating characteristic (ROC) curves and area under the curve (AUC) are computed to assess discrimination performance.
+
+```bash
+python ROC_curve.py \
+  --pred_path /path/to/predictions \
+  --output_dir /path/to/results
+```
+### Kaplan–Meier survival analysis
+
+Kaplan–Meier curves are used to compare survival outcomes between predicted risk groups.
+
+```bash
+python km_curve.py \
+  --pred_path /path/to/predictions \
+  --clinical_csv /path/to/clinical.csv \
+  --output_dir /path/to/results
+```
+
+### ROC analysis
+
+Receiver operating characteristic (ROC) curves and area under the curve (AUC) are computed to assess discrimination performance.
+
+```bash
+python ROC_curve.py \
+  --pred_path /path/to/predictions \
+  --output_dir /path/to/results
+```
