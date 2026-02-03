@@ -169,3 +169,15 @@ python ROC_curve.py \
   --pred_path /path/to/predictions \
   --output_dir /path/to/results
 ```
+
+## Visualization 
+
+To facilitate qualitative inspection of model predictions, we provide a script to visualize attention distributions on whole-slide images. The generated attention maps highlight spatial regions that contribute most strongly to the model’s slide-level predictions.
+
+```bash
+python attention_map.py \
+  --wsi_dir /path/to/WSI_folder \
+  --h5_dir /path/to/features \
+  --pred_path /path/to/predictions \
+  --output_dir /path/to/attention_maps
+
