@@ -45,37 +45,51 @@ This step generates tissue masks from WSIs, automatically removing background re
 python Preprocessing/process.py -pic_path "HE_slides_raw" -out_dir "Process_pics" -file_type svs -min_area 1000000 -min_hole 100000
 ```
 
--
+- If pen-mark artifacts are present, the following script can be used to suppress pen-mark regions. Users are advised to adjust the relevant parameters based on the extent of the artifacts. Users are advised to adjust the pen-mark–related morphological parameters (e.g. dilation strength and kernel size) based on the extent of the artifacts.
 
-**Output**
+```
+python Preprocessing/process_mark.py \
+  -pic_path "HE_slides_raw" \
+  -out_dir "Process_pics" \
+  -file_type svs \
+  -min_area 1000000 \
+  -min_hole 100000 \
+  -red_dilate_iterations 1 \
+  -blue_dilate_iterations 3 \
+  -green_dilate_iterations 8 \
+  -black_kernel_size 8 \
+  -black_close_iterations 12 \
+  -black_dilate_iterations 10 \
+  -overwrite
+```
 
-~~~
-/path/to/out_dir/mask_pic/*.png
-~~~
+After processing, the following three subdirectories will be created under `Process_pics`:
+
+- `origin_pic`: original whole-slide images converted to a common image format for visualization and reference.
+- `circle_pic`: intermediate visualization images illustrating detected tissue contours.
+- `mask_pic`: binary tissue masks defining valid tissue regions for downstream patch extraction.
+
 
 ### 2. Patch extraction, stain normalization, and UNI feature extraction
 
 This step performs patch extraction within masked tissue regions, applies stain normalization, and encodes each patch using a pretrained UNI model. Patch-level features and spatial coordinates are saved in `.h5` format for downstream graph construction.
 
-~~~bash
-python cut_norm_feature.py \
-  -input_folder "TCGA" \
-  -mask_folder "mask_pic" \
-  -output_folder features \
+```bash
+python Preprocessing/cut_norm_feature.py \
+  -input_folder "HE_slides_raw" \
+  -mask_folder "Process_pics/mask_pic" \
+  -output_folder "Features" \
   -patch_size 256 \
-  -read_size 1024 \
+  -read_size 896 \
   -file_type svs \
-  -r "patch_0021.png" \
+  -r "ref_image.png" \
   -m macenko \
-  --hf_token xxxxxxx \
-  --batch_size 128 \
-  --model_dir uni_model \
-  --num_workers 8 \
-  --grid_output_dir grid \
-  -blank_threshold 0.6 \
-  --save_raw_patches raw_patches \
-  --save_normalized_patches normalized_patches
-~~~
+  --hf_token xxxxxx \
+  --batch_size 32 \
+  --model_dir uni_model_path \
+  --num_workers 4 \
+  -blank_threshold 0.6
+```
 
 **Output**
 
