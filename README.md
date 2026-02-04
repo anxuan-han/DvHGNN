@@ -159,7 +159,7 @@ python train.py \
 
 Model performance is evaluated using standard survival and classification metrics. All evaluation scripts operate on model predictions generated during training.
 
-### ROC analysis
+### ROC analysis 
 
 Receiver operating characteristic (ROC) curves and area under the curve (AUC) are computed to assess discrimination performance.
 
@@ -179,7 +179,7 @@ python km_curve.py \
   --output_dir /path/to/results
 ```
 
-### ROC analysis
+### C-index analysis这个有点问题
 
 Receiver operating characteristic (ROC) curves and area under the curve (AUC) are computed to assess discrimination performance.
 
