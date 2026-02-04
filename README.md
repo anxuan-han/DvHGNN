@@ -94,7 +94,7 @@ python Preprocessing/cut_norm_feature.py \
 **Output**
 
 ~~~
-features/*.h5
+Features/*.h5
 ~~~
 
 Each file contains patch-level embeddings (`features`) and spatial coordinates (`coordinates`).
