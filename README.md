@@ -1,4 +1,9 @@
 # DvHGNN
+<div align="justify">
+
+Precise risk stratification for biochemical recurrence (BCR) in prostate cancer is currently constrained by the inability of clinical markers to resolve tumor heterogeneity and the loss of spatial context inherent in bulk molecular assays. Here, we present DvHGNN, an interpretable dual-view hypergraph neural network that predicts patient-level BCR risk directly from routine histopathology images by reconstructing the spatial syntax of the tumor ecosystem. Unlike conventional graph-based models that rely on simple pairwise connections, DvHGNN explicitly models high-order tissue architecture through two complementary lenses: a spatial view capturing emergent microenvironmental neighborhoods and a semantic view aggregating global phenotypic patterns. Across multi-institutional cohorts, DvHGNN consistently outperformed state-of-the-art multiple instance learning baselines. Beyond predictive accuracy, the model functioned as a digital discovery engine, revealing that high-risk tissue regions are characterized by distinct nuclear morphometrics and coordinated stromal remodeling. Notably, these histologically derived risk scores were intrinsically coupled with the upregulation of extracellular matrix genes, including COL1A1 and COMP, without the need for additional molecular profiling. These findings establish DvHGNN as a scalable framework that decodes the multi-scale tissue mechanisms driving disease recurrence, offering a biologically grounded approach to precision oncology.
+
+</div>
 
 ![](https://github.com/anxuan-han/DvHGNN/blob/main/workflow.png)
 
@@ -33,14 +38,14 @@ The preprocessing pipeline converts whole-slide images into structured patch- an
 
 This step generates tissue masks from WSIs, automatically removing background regions and common pen-mark artifacts. The resulting masks define valid tissue regions for subsequent patch extraction.
 
-~~~bash
-python process.py \
-  -pic_path "/path/to/WSI_folder" \
-  -file_type svs \
-  -min_area 1000000 \
-  -min_hole 100000 \
-  -out_dir "/path/to/out_dir"
-~~~
+- If no pen-mark artifacts are present, this step effectively performs tissue–background separation to identify valid tissue regions for downstream processing.
+
+
+```bash
+python Preprocessing/process.py -pic_path "HE_slides_raw" -out_dir "Process_pics" -file_type svs -min_area 1000000 -min_hole 100000
+```
+
+-
 
 **Output**
 
@@ -180,4 +185,5 @@ python attention_map.py \
   --h5_dir /path/to/features \
   --pred_path /path/to/predictions \
   --output_dir /path/to/attention_maps
+```
 
