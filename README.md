@@ -194,7 +194,7 @@ The ROC curves and AUC results are saved under `Model_evaluation/results/validat
 To facilitate qualitative inspection of model predictions, we provide a script to visualize attention distributions on whole-slide images. The generated attention maps highlight spatial regions that contribute most strongly to the model’s slide-level predictions.
 
 ```
-python Model_evaluation/attention_map.py --h5_dir Features --csv_path data/recurrence_information.csv --model_path Model_training/results/best_model.pth --output_dir Model_evaluation/attention_overlays --device cuda --wsi_dirs HE_slides_raw --max_patients 10 --target_pos 5 --target_neg 5
+python Visualization/attention_map.py --h5_dir Features --csv_path data/recurrence_information.csv --model_path Model_training/results/best_model.pth --output_dir Model_evaluation/attention_overlays --device cuda --wsi_dirs HE_slides_raw --max_patients 10 --target_pos 5 --target_neg 5
 ```
 The generated attention map visualizations are saved under `Model_evaluation/attention_overlays`.
 
