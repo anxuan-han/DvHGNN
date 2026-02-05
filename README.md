@@ -26,9 +26,16 @@ Precise risk stratification for biochemical recurrence (BCR) in prostate cancer 
 * matplotlib==3.9.3
 * tqdm==4.67.1
 
-
 ## Dataset
 The model was trained and internally validated on the TCGA-PRAD cohort and evaluated on an independent SAH cohort.
+
+## Quick Start
+
+After preparing WSIs and metadata, the full pipeline can be executed as follows:
+1. Generate tissue masks.
+2. Extract patch features and construct hypergraphs.
+3. Train the DvHGNN model.
+4. Evaluate model performance and visualize attention maps.
 
 ## Preprocessing
 
@@ -72,7 +79,9 @@ After processing, the following three subdirectories will be created under `Proc
 
 ### 2. Patch extraction, stain normalization, and UNI feature extraction
 
-This step performs patch extraction within masked tissue regions, applies stain normalization, and encodes each patch using a pretrained UNI model. Patch-level features and spatial coordinates are saved in `.h5` format for downstream graph construction.
+This step performs patch extraction within masked tissue regions, applies stain normalization, and encodes each patch using a pretrained UNI model.  Patch-level features are extracted using a pretrained [UNI model](https://github.com/mahmoodlab/UNI), with pretrained weights specified via the `--model_dir` argument.
+
+Patch-level features and spatial coordinates are saved in `.h5` format for downstream graph construction.
 
 ```bash
 python Preprocessing/cut_norm_feature.py \
@@ -162,6 +171,10 @@ The model is trained using precomputed patch-level features and fixed semantic a
 python Model_training/train.py --h5_dir Features/ --csv_path data/recurrence_information.csv --output_dir Model_training/results --epochs 50 --lr 1e-4 --weight_decay 1e-3 --dropout 0.6  --train_ratio 0.8  --device cuda --seed 42
 ```
 
+Alternatively, pretrained model weights trained for prostate cancer biochemical recurrence prediction can be downloaded from [Hugging Face](https://huggingface.co/ananananxuan/DvHGNN). 
+
+
+
 
 ## Evaluation
 
@@ -172,40 +185,16 @@ Model performance is evaluated using standard survival and classification metric
 Receiver operating characteristic (ROC) curves and area under the curve (AUC) are computed to assess discrimination performance.
 
 ```bash
-python ROC_curve.py \
-  --pred_path /path/to/predictions \
-  --output_dir /path/to/results
+python Model_evaluation/ROC_curve.py --dataset_type validation --h5_dir Features --csv_path data/recurrence_information.csv --hgnn_model_path Model_training/results/best_model.pth --output_dir Model_evaluation/results --device cuda --dropout 0.6 --seed 42 --train_ratio 0.6
 ```
-### Kaplan–Meier survival analysis
-
-Kaplan–Meier curves are used to compare survival outcomes between predicted risk groups.
-
-```bash
-python km_curve.py \
-  --pred_path /path/to/predictions \
-  --clinical_csv /path/to/clinical.csv \
-  --output_dir /path/to/results
-```
-
-### C-index analysis这个有点问题
-
-Receiver operating characteristic (ROC) curves and area under the curve (AUC) are computed to assess discrimination performance.
-
-```bash
-python ROC_curve.py \
-  --pred_path /path/to/predictions \
-  --output_dir /path/to/results
-```
+The ROC curves and AUC results are saved under `Model_evaluation/results/validation/`.
 
 ## Visualization 
 
 To facilitate qualitative inspection of model predictions, we provide a script to visualize attention distributions on whole-slide images. The generated attention maps highlight spatial regions that contribute most strongly to the model’s slide-level predictions.
 
-```bash
-python attention_map.py \
-  --wsi_dir /path/to/WSI_folder \
-  --h5_dir /path/to/features \
-  --pred_path /path/to/predictions \
-  --output_dir /path/to/attention_maps
 ```
+python Model_evaluation/attention_map.py --h5_dir Features --csv_path data/recurrence_information.csv --model_path Model_training/results/best_model.pth --output_dir Model_evaluation/attention_overlays --device cuda --wsi_dirs HE_slides_raw --max_patients 10 --target_pos 5 --target_neg 5
+```
+The generated attention map visualizations are saved under `Model_evaluation/attention_overlays`.
 
