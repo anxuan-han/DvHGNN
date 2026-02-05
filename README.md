@@ -80,7 +80,7 @@ python Preprocessing/cut_norm_feature.py \
   -mask_folder "Process_pics/mask_pic" \
   -output_folder "Features" \
   -patch_size 256 \
-  -read_size 896 \
+  -read_size 1024 \
   -file_type svs \
   -r "ref_image.png" \
   -m macenko \
@@ -92,33 +92,49 @@ python Preprocessing/cut_norm_feature.py \
 ```
 
 **Output**
-
+The following files will be generated under `Features`:
 ~~~
 Features/*.h5
 ~~~
+Each `.h5` file contains the following datasets:
+- **`patch_indices`**: `(N,)`  
+  Integer indices identifying each patch, preserving the original extraction order.
+- **`features`**: `(N, 1024)`  
+  Patch-level feature embeddings extracted by the pretrained UNI model.
+- **`coordinates`**: `(N, 2)`  
+  Spatial coordinates `(x, y)` of each extracted patch in the original WSI.
 
-Each file contains patch-level embeddings (`features`) and spatial coordinates (`coordinates`).
+
+
+
 
 ### 3. Semantic hypergraph construction
 
 This step constructs a semantic hypergraph by clustering patch-level features based on feature similarity. Patches assigned to the same cluster form hyperedges that capture global semantic relationships across the slide.
 
-~~~bash
-python kmeans.py \
-  --feature_dir "TCGA" \
-  --n_clusters 10 \
-  --random_state 42
-~~~
+```
+python Preprocessing/kmeans.py --feature_dir "Features" --n_clusters 10 --random_state 42
+```
+
+After execution, each `.h5` file is updated with the following additional dataset:
+
+- **`clusters`**: `(N,)`  
+  Cluster assignments for each patch, indicating semantic group membership used to form hyperedges.
+
 
 ### 4. Spatial hypergraph construction
 
 This step constructs a spatial hypergraph by connecting neighboring patches based on spatial proximity. Local spatial neighborhoods are modeled using k-nearest neighbors, capturing tissue architecture and local context.
 
-~~~bash
-python knn.py \
-  --feature_dir "TCGA" \
-  --n_neighbors 8
-~~~
+```
+python Preprocessing/knn.py --feature_dir /scratchdata1/users/a1978372/Anxuan/test_framwork/Features --n_neighbors 8
+```
+
+After execution, each `.h5` file is updated with the following additional dataset:
+
+- **`knn_indices`**: `(N, k)`  
+  Indices of the `k` nearest neighboring patches for each patch, based on spatial proximity.
+
 
 ## Data Preparation
 
@@ -143,15 +159,7 @@ Here, `N` denotes the number of patches in a slide, `D` the feature dimension, a
 The model is trained using precomputed patch-level features and fixed semantic and spatial hypergraphs. Training is performed at the slide level, with one graph per sample.
 
 ```bash
-python train.py \
-  --h5_dir /path/to/features \
-  --csv_path /path/to/labels.csv \
-  --output_dir /path/to/results \
-  --epochs 50 \
-  --lr 0.0001 \
-  --weight_decay 0.001 \
-  --dropout 0.5 \
-  --train_dropout 0.3
+python Model_training/train.py --h5_dir Features/ --csv_path data/recurrence_information.csv --output_dir Model_training/results --epochs 50 --lr 1e-4 --weight_decay 1e-3 --dropout 0.6  --train_ratio 0.8  --device cuda --seed 42
 ```
 
 
