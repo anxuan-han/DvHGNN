@@ -7,6 +7,9 @@ Precise risk stratification for biochemical recurrence (BCR) in prostate cancer 
 
 ![](https://github.com/anxuan-han/DvHGNN/blob/main/workflow.png)
 
+
+All experiments were conducted on an NVIDIA A100 (40 GB) GPU with CUDA 11.6.
+
 ## Requirements
 * python>=3.8
 * torch==1.13.1
@@ -103,7 +106,7 @@ python Preprocessing/cut_norm_feature.py \
 **Output**
 The following files will be generated under `Features`:
 ~~~
-Features/*.h5
+Features/{patient_id}.h5
 ~~~
 Each `.h5` file contains the following datasets:
 - **`patch_indices`**: `(N,)`  
@@ -197,4 +200,6 @@ To facilitate qualitative inspection of model predictions, we provide a script t
 python Visualization/attention_map.py --h5_dir Features --csv_path data/recurrence_information.csv --model_path Model_training/results/best_model.pth --output_dir Model_evaluation/attention_overlays --device cuda --wsi_dirs HE_slides_raw --max_patients 10 --target_pos 5 --target_neg 5
 ```
 The generated attention map visualizations are saved under `Model_evaluation/attention_overlays`.
+
+
 
